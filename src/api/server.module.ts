@@ -10,6 +10,7 @@ import { GroupController } from './controllers/group.controller';
 import { InstanceController } from './controllers/instance.controller';
 import { LabelController } from './controllers/label.controller';
 import { NewsletterController } from './controllers/newsletter.controller';
+import { CommunityController } from './controllers/community.controller';
 import { ProxyController } from './controllers/proxy.controller';
 import { SendMessageController } from './controllers/sendMessage.controller';
 import { SettingsController } from './controllers/settings.controller';
@@ -108,6 +109,7 @@ export const businessController = new BusinessController(waMonitor);
 export const groupController = new GroupController(waMonitor);
 export const labelController = new LabelController(waMonitor);
 export const newsletterController = new NewsletterController(waMonitor);
+export const communityController = new CommunityController(waMonitor);
 
 export const eventManager = new EventManager(prismaRepository, waMonitor);
 export const chatbotController = new ChatbotController(prismaRepository, waMonitor);

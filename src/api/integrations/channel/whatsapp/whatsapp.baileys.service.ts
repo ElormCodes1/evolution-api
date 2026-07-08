@@ -25,6 +25,12 @@ import {
   UpdateNewsletterDto,
 } from '@api/dto/newsletter.dto';
 import {
+  CommunityJidDto,
+  CreateCommunityDto,
+  LinkGroupDto,
+  UpdateCommunityDto,
+} from '@api/dto/community.dto';
+import {
   AcceptGroupInvite,
   CreateGroupDto,
   GetParticipant,
@@ -3896,6 +3902,89 @@ export class BaileysStartupService extends ChannelStartupService {
       return { jid: data.jid, deleted: true };
     } catch (error) {
       throw new InternalServerErrorException(['Error deleting the newsletter.', error?.toString()]);
+    }
+  }
+
+  // ============================================================
+  // Communities (Baileys community* API)
+  // ============================================================
+
+  public async createCommunity(data: CreateCommunityDto) {
+    try {
+      return await this.client.communityCreate(data.subject, data.description ?? '');
+    } catch (error) {
+      throw new InternalServerErrorException(['Error creating the community.', error?.toString()]);
+    }
+  }
+
+  public async communityMetadata(data: CommunityJidDto) {
+    try {
+      return await this.client.communityMetadata(data.jid);
+    } catch (error) {
+      throw new InternalServerErrorException(['Error fetching community metadata.', error?.toString()]);
+    }
+  }
+
+  public async fetchAllCommunities() {
+    try {
+      return await this.client.communityFetchAllParticipating();
+    } catch (error) {
+      throw new InternalServerErrorException(['Error fetching communities.', error?.toString()]);
+    }
+  }
+
+  public async communityLinkedGroups(data: CommunityJidDto) {
+    try {
+      return await this.client.communityFetchLinkedGroups(data.jid);
+    } catch (error) {
+      throw new InternalServerErrorException(['Error fetching linked groups.', error?.toString()]);
+    }
+  }
+
+  public async linkGroupToCommunity(data: LinkGroupDto) {
+    try {
+      await this.client.communityLinkGroup(data.groupJid, data.communityJid);
+      return { communityJid: data.communityJid, groupJid: data.groupJid, linked: true };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error linking the group.', error?.toString()]);
+    }
+  }
+
+  public async unlinkGroupFromCommunity(data: LinkGroupDto) {
+    try {
+      await this.client.communityUnlinkGroup(data.groupJid, data.communityJid);
+      return { communityJid: data.communityJid, groupJid: data.groupJid, linked: false };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error unlinking the group.', error?.toString()]);
+    }
+  }
+
+  public async updateCommunity(data: UpdateCommunityDto) {
+    try {
+      if (data.subject) await this.client.communityUpdateSubject(data.jid, data.subject);
+      if (data.description !== undefined)
+        await this.client.communityUpdateDescription(data.jid, data.description);
+      return { jid: data.jid, updated: true };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error updating the community.', error?.toString()]);
+    }
+  }
+
+  public async leaveCommunity(data: CommunityJidDto) {
+    try {
+      await this.client.communityLeave(data.jid);
+      return { jid: data.jid, left: true };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error leaving the community.', error?.toString()]);
+    }
+  }
+
+  public async communityInviteCode(data: CommunityJidDto) {
+    try {
+      const code = await this.client.communityInviteCode(data.jid);
+      return { jid: data.jid, inviteCode: code, inviteUrl: code ? `https://chat.whatsapp.com/${code}` : null };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error fetching the invite code.', error?.toString()]);
     }
   }
 
