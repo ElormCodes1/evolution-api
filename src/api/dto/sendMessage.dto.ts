@@ -81,6 +81,22 @@ export class SendAlbumDto extends Metadata {
   }>;
 }
 
+export class SendProductDto extends Metadata {
+  // The catalog product to share (as a native product-card message).
+  productId: string;
+  title: string;
+  description?: string;
+  currency: string;
+  // Catalog price in the currency's minor units (as getCatalog returns it).
+  price: number;
+  retailerId?: string;
+  url?: string;
+  // Product image (url or base64).
+  image: string;
+  // JID of the business that owns the catalog (so the card links to it).
+  businessOwnerJid: string;
+}
+
 export class SendPinDto extends Metadata {
   // The message being (un)pinned, identified by its Baileys key.
   key: { id: string; fromMe: boolean; remoteJid: string };

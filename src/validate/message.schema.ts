@@ -229,6 +229,27 @@ export const albumMessageSchema: JSONSchema7 = {
   ...isNotEmpty('number'),
 };
 
+export const productMessageSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    number: { ...numberDefinition },
+    productId: { type: 'string' },
+    title: { type: 'string' },
+    description: { type: 'string' },
+    currency: { type: 'string' },
+    price: { type: 'number' },
+    retailerId: { type: 'string' },
+    url: { type: 'string' },
+    image: { type: 'string' },
+    businessOwnerJid: { type: 'string' },
+    delay: { type: 'integer' },
+    quoted: { ...quotedOptionsSchema },
+  },
+  required: ['number', 'productId', 'title', 'image', 'businessOwnerJid'],
+  ...isNotEmpty('number', 'productId', 'image', 'businessOwnerJid'),
+};
+
 export const pinMessageSchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',

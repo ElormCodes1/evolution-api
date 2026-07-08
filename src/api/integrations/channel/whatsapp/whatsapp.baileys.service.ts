@@ -69,6 +69,7 @@ import {
   SendMediaDto,
   SendPinDto,
   SendPollDto,
+  SendProductDto,
   SendPtvDto,
   SendReactionDto,
   SendStatusDto,
@@ -2244,6 +2245,7 @@ export class BaileysStartupService extends ChannelStartupService {
       !message['poll'] &&
       !message['sticker'] &&
       !message['event'] &&
+      !message['product'] &&
       sender != 'status@broadcast'
     ) {
       return await this.client.sendMessage(
@@ -2771,6 +2773,33 @@ export class BaileysStartupService extends ChannelStartupService {
     } catch (error) {
       throw new BadRequestException('Error sending album', error.toString());
     }
+  }
+
+  public async productMessage(data: SendProductDto) {
+    // Share a catalog product as a native product-card message (Baileys
+    // productMessage). priceAmount1000 is thousandths of the currency unit;
+    // getCatalog gives price in minor units (×100 for 2-decimal currencies),
+    // so ×10 → thousandths.
+    const product: any = {
+      productId: data.productId,
+      title: data.title,
+      description: data.description ?? '',
+      currencyCode: data.currency,
+      priceAmount1000: Math.round((data.price ?? 0) * 10),
+      retailerId: data.retailerId,
+      url: data.url,
+      productImage: isURL(data.image) ? { url: data.image } : Buffer.from(data.image, 'base64'),
+    };
+
+    return await this.sendMessageWithTyping(
+      data.number,
+      { product, businessOwnerJid: data.businessOwnerJid } as any,
+      {
+        delay: data?.delay,
+        presence: 'composing',
+        quoted: data?.quoted,
+      },
+    );
   }
 
   public async pinMessage(data: SendPinDto) {

@@ -10,6 +10,7 @@ import {
   SendMediaDto,
   SendPinDto,
   SendPollDto,
+  SendProductDto,
   SendPtvDto,
   SendReactionDto,
   SendStatusDto,
@@ -29,6 +30,7 @@ import {
   mediaMessageSchema,
   pinMessageSchema,
   pollMessageSchema,
+  productMessageSchema,
   ptvMessageSchema,
   reactionMessageSchema,
   statusMessageSchema,
@@ -184,6 +186,16 @@ export class MessageRouter extends RouterBroker {
           schema: pinMessageSchema,
           ClassRef: SendPinDto,
           execute: (instance, data) => sendMessageController.pinMessage(instance, data),
+        });
+
+        return res.status(HttpStatus.CREATED).json(response);
+      })
+      .post(this.routerPath('sendProduct'), ...guards, async (req, res) => {
+        const response = await this.dataValidate<SendProductDto>({
+          request: req,
+          schema: productMessageSchema,
+          ClassRef: SendProductDto,
+          execute: (instance, data) => sendMessageController.sendProduct(instance, data),
         });
 
         return res.status(HttpStatus.CREATED).json(response);

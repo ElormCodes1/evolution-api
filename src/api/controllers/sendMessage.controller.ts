@@ -10,6 +10,7 @@ import {
   SendMediaDto,
   SendPinDto,
   SendPollDto,
+  SendProductDto,
   SendPtvDto,
   SendReactionDto,
   SendStatusDto,
@@ -110,6 +111,10 @@ export class SendMessageController {
 
   public async pinMessage({ instanceName }: InstanceDto, data: SendPinDto) {
     return await this.waMonitor.waInstances[instanceName].pinMessage(data);
+  }
+
+  public async sendProduct({ instanceName }: InstanceDto, data: SendProductDto) {
+    return await this.waMonitor.waInstances[instanceName].productMessage(data);
   }
 
   public async sendAlbum({ instanceName }: InstanceDto, data: SendAlbumDto) {
