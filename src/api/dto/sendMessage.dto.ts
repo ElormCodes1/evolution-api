@@ -71,6 +71,21 @@ export class SendPollDto extends Metadata {
   messageSecret?: Uint8Array;
 }
 
+export class SendEventDto extends Metadata {
+  name: string;
+  description?: string;
+  // Unix seconds
+  startTime: number;
+  endTime?: number;
+  extraGuestsAllowed?: boolean;
+  location?: {
+    latitude: number;
+    longitude: number;
+    name?: string;
+    address?: string;
+  };
+}
+
 export type MediaType = 'image' | 'document' | 'video' | 'audio' | 'ptv';
 
 export class SendMediaDto extends Metadata {

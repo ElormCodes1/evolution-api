@@ -3,6 +3,7 @@ import {
   SendAudioDto,
   SendButtonsDto,
   SendContactDto,
+  SendEventDto,
   SendListDto,
   SendLocationDto,
   SendMediaDto,
@@ -19,6 +20,7 @@ import {
   audioMessageSchema,
   buttonsMessageSchema,
   contactMessageSchema,
+  eventMessageSchema,
   listMessageSchema,
   locationMessageSchema,
   mediaMessageSchema,
@@ -158,6 +160,16 @@ export class MessageRouter extends RouterBroker {
           schema: pollMessageSchema,
           ClassRef: SendPollDto,
           execute: (instance, data) => sendMessageController.sendPoll(instance, data),
+        });
+
+        return res.status(HttpStatus.CREATED).json(response);
+      })
+      .post(this.routerPath('sendEvent'), ...guards, async (req, res) => {
+        const response = await this.dataValidate<SendEventDto>({
+          request: req,
+          schema: eventMessageSchema,
+          ClassRef: SendEventDto,
+          execute: (instance, data) => sendMessageController.sendEvent(instance, data),
         });
 
         return res.status(HttpStatus.CREATED).json(response);

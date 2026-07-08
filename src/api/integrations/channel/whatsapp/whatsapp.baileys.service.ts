@@ -61,6 +61,7 @@ import {
   SendAudioDto,
   SendButtonsDto,
   SendContactDto,
+  SendEventDto,
   SendListDto,
   SendLocationDto,
   SendMediaDto,
@@ -2235,7 +2236,13 @@ export class BaileysStartupService extends ChannelStartupService {
       );
     }
 
-    if (!message['audio'] && !message['poll'] && !message['sticker'] && sender != 'status@broadcast') {
+    if (
+      !message['audio'] &&
+      !message['poll'] &&
+      !message['sticker'] &&
+      !message['event'] &&
+      sender != 'status@broadcast'
+    ) {
       return await this.client.sendMessage(
         sender,
         {
@@ -2685,6 +2692,36 @@ export class BaileysStartupService extends ChannelStartupService {
         presence: 'composing',
         quoted: data?.quoted,
         linkPreview: data?.linkPreview,
+        mentionsEveryOne: data?.mentionsEveryOne,
+        mentioned: data?.mentioned,
+      },
+    );
+  }
+
+  public async eventMessage(data: SendEventDto) {
+    const event: any = {
+      name: data.name,
+      description: data.description,
+      startDate: new Date(data.startTime * 1000),
+    };
+    if (data.endTime) event.endDate = new Date(data.endTime * 1000);
+    if (typeof data.extraGuestsAllowed === 'boolean') event.extraGuestsAllowed = data.extraGuestsAllowed;
+    if (data.location) {
+      event.location = {
+        degreesLatitude: data.location.latitude,
+        degreesLongitude: data.location.longitude,
+        name: data.location.name,
+        address: data.location.address,
+      };
+    }
+
+    return await this.sendMessageWithTyping(
+      data.number,
+      { event },
+      {
+        delay: data?.delay,
+        presence: 'composing',
+        quoted: data?.quoted,
         mentionsEveryOne: data?.mentionsEveryOne,
         mentioned: data?.mentioned,
       },

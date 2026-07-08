@@ -175,6 +175,36 @@ export const audioMessageSchema: JSONSchema7 = {
   required: ['number'],
 };
 
+export const eventMessageSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    number: { ...numberDefinition },
+    name: { type: 'string' },
+    description: { type: 'string' },
+    startTime: { type: 'integer', description: 'Event start time in unix seconds' },
+    endTime: { type: 'integer', description: 'Event end time in unix seconds' },
+    extraGuestsAllowed: { type: 'boolean', enum: [true, false] },
+    location: {
+      type: 'object',
+      properties: {
+        latitude: { type: 'number' },
+        longitude: { type: 'number' },
+        name: { type: 'string' },
+        address: { type: 'string' },
+      },
+      required: ['latitude', 'longitude'],
+    },
+    delay: {
+      type: 'integer',
+      description: 'Enter a value in milliseconds',
+    },
+    quoted: { ...quotedOptionsSchema },
+  },
+  required: ['number', 'name', 'startTime'],
+  ...isNotEmpty('number', 'name'),
+};
+
 export const statusMessageSchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',
