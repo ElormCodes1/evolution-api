@@ -6,6 +6,7 @@ import {
   GroupDescriptionDto,
   GroupInvite,
   GroupJid,
+  GroupPendingUpdateDto,
   GroupPictureDto,
   GroupSendInvite,
   GroupSubjectDto,
@@ -26,6 +27,7 @@ import {
   updateGroupPictureSchema,
   updateGroupSubjectSchema,
   updateParticipantsSchema,
+  updatePendingParticipantsSchema,
   updateSettingsSchema,
 } from '@validate/validate.schema';
 import { RequestHandler, Router } from 'express';
@@ -105,6 +107,26 @@ export class GroupRouter extends RouterBroker {
         });
 
         res.status(HttpStatus.OK).json(response);
+      })
+      .get(this.routerPath('pendingParticipants'), ...guards, async (req, res) => {
+        const response = await this.groupValidate<GroupJid>({
+          request: req,
+          schema: groupJidSchema,
+          ClassRef: GroupJid,
+          execute: (instance, data) => groupController.findPendingParticipants(instance, data),
+        });
+
+        res.status(HttpStatus.OK).json(response);
+      })
+      .post(this.routerPath('updatePendingParticipant'), ...guards, async (req, res) => {
+        const response = await this.groupValidate<GroupPendingUpdateDto>({
+          request: req,
+          schema: updatePendingParticipantsSchema,
+          ClassRef: GroupPendingUpdateDto,
+          execute: (instance, data) => groupController.updatePendingParticipant(instance, data),
+        });
+
+        res.status(HttpStatus.CREATED).json(response);
       })
       .get(this.routerPath('inviteCode'), ...guards, async (req, res) => {
         const response = await this.groupValidate<GroupJid>({

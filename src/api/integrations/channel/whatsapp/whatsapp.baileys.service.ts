@@ -42,6 +42,7 @@ import {
   GroupDescriptionDto,
   GroupInvite,
   GroupJid,
+  GroupPendingUpdateDto,
   GroupPictureDto,
   GroupSendInvite,
   GroupSubjectDto,
@@ -4801,6 +4802,30 @@ export class BaileysStartupService extends ChannelStartupService {
       return { updateParticipants: updateParticipants };
     } catch (error) {
       throw new BadRequestException('Error updating participants', error.toString());
+    }
+  }
+
+  public async findPendingParticipants(id: GroupJid) {
+    try {
+      const participants = await this.client.groupRequestParticipantsList(id.groupJid);
+      return { participants: participants ?? [] };
+    } catch (error) {
+      throw new NotFoundException('No pending participants', error.toString());
+    }
+  }
+
+  public async updatePendingParticipant(update: GroupPendingUpdateDto) {
+    try {
+      // Requester JIDs come from findPendingParticipants (may be @lid), so
+      // pass them straight through rather than re-deriving via createJid.
+      const result = await this.client.groupRequestParticipantsUpdate(
+        update.groupJid,
+        update.participants,
+        update.action,
+      );
+      return { updateParticipants: result };
+    } catch (error) {
+      throw new BadRequestException('Error updating pending participants', error.toString());
     }
   }
 

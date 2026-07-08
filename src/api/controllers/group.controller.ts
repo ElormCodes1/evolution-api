@@ -5,6 +5,7 @@ import {
   GroupDescriptionDto,
   GroupInvite,
   GroupJid,
+  GroupPendingUpdateDto,
   GroupPictureDto,
   GroupSendInvite,
   GroupSubjectDto,
@@ -68,6 +69,14 @@ export class GroupController {
 
   public async updateGParticipate(instance: InstanceDto, update: GroupUpdateParticipantDto) {
     return await this.waMonitor.waInstances[instance.instanceName].updateGParticipant(update);
+  }
+
+  public async findPendingParticipants(instance: InstanceDto, groupJid: GroupJid) {
+    return await this.waMonitor.waInstances[instance.instanceName].findPendingParticipants(groupJid);
+  }
+
+  public async updatePendingParticipant(instance: InstanceDto, update: GroupPendingUpdateDto) {
+    return await this.waMonitor.waInstances[instance.instanceName].updatePendingParticipant(update);
   }
 
   public async updateGSetting(instance: InstanceDto, update: GroupUpdateSettingDto) {

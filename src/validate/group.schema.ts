@@ -131,6 +131,32 @@ export const updateParticipantsSchema: JSONSchema7 = {
   ...isNotEmpty('groupJid', 'action'),
 };
 
+export const updatePendingParticipantsSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    groupJid: { type: 'string' },
+    action: {
+      type: 'string',
+      enum: ['approve', 'reject'],
+    },
+    participants: {
+      type: 'array',
+      minItems: 1,
+      uniqueItems: true,
+      // Requester JIDs from the pending list (may be @lid), so no numeric
+      // pattern here — passed through to Baileys as-is.
+      items: {
+        type: 'string',
+        minLength: 1,
+        description: '"participants" must be an array of requester JIDs',
+      },
+    },
+  },
+  required: ['groupJid', 'action', 'participants'],
+  ...isNotEmpty('groupJid', 'action'),
+};
+
 export const updateSettingsSchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',

@@ -47,6 +47,13 @@ export class GroupUpdateParticipantDto extends GroupJid {
   participants: string[];
 }
 
+export class GroupPendingUpdateDto extends GroupJid {
+  action: 'approve' | 'reject';
+  // Requester JIDs (as returned by the pending-participants list; may be
+  // @s.whatsapp.net or @lid) — passed through to Baileys unchanged.
+  participants: string[];
+}
+
 export class GroupUpdateSettingDto extends GroupJid {
   action: 'announcement' | 'not_announcement' | 'unlocked' | 'locked';
 }
