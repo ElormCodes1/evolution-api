@@ -4,6 +4,9 @@ import {
   DeleteMessage,
   getBase64FromMediaMessageDto,
   MarkChatUnreadDto,
+  MuteChatDto,
+  PinChatDto,
+  StarMessageDto,
   NumberDto,
   PrivacySettingDto,
   ProfileNameDto,
@@ -36,6 +39,18 @@ export class ChatController {
 
   public async markChatUnread({ instanceName }: InstanceDto, data: MarkChatUnreadDto) {
     return await this.waMonitor.waInstances[instanceName].markChatUnread(data);
+  }
+
+  public async pinChat({ instanceName }: InstanceDto, data: PinChatDto) {
+    return await this.waMonitor.waInstances[instanceName].pinChat(data);
+  }
+
+  public async muteChat({ instanceName }: InstanceDto, data: MuteChatDto) {
+    return await this.waMonitor.waInstances[instanceName].muteChat(data);
+  }
+
+  public async starMessage({ instanceName }: InstanceDto, data: StarMessageDto) {
+    return await this.waMonitor.waInstances[instanceName].starMessage(data);
   }
 
   public async deleteMessage({ instanceName }: InstanceDto, data: DeleteMessage) {

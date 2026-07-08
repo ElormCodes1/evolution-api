@@ -5,6 +5,9 @@ import {
   DeleteMessage,
   getBase64FromMediaMessageDto,
   MarkChatUnreadDto,
+  MuteChatDto,
+  PinChatDto,
+  StarMessageDto,
   NumberDto,
   PrivacySettingDto,
   ProfileNameDto,
@@ -25,6 +28,9 @@ import {
   contactValidateSchema,
   deleteMessageSchema,
   markChatUnreadSchema,
+  muteChatSchema,
+  pinChatSchema,
+  starMessageSchema,
   messageUpSchema,
   messageValidateSchema,
   presenceSchema,
@@ -86,6 +92,36 @@ export class ChatRouter extends RouterBroker {
           schema: markChatUnreadSchema,
           ClassRef: MarkChatUnreadDto,
           execute: (instance, data) => chatController.markChatUnread(instance, data),
+        });
+
+        return res.status(HttpStatus.CREATED).json(response);
+      })
+      .post(this.routerPath('pinChat'), ...guards, async (req, res) => {
+        const response = await this.dataValidate<PinChatDto>({
+          request: req,
+          schema: pinChatSchema,
+          ClassRef: PinChatDto,
+          execute: (instance, data) => chatController.pinChat(instance, data),
+        });
+
+        return res.status(HttpStatus.CREATED).json(response);
+      })
+      .post(this.routerPath('muteChat'), ...guards, async (req, res) => {
+        const response = await this.dataValidate<MuteChatDto>({
+          request: req,
+          schema: muteChatSchema,
+          ClassRef: MuteChatDto,
+          execute: (instance, data) => chatController.muteChat(instance, data),
+        });
+
+        return res.status(HttpStatus.CREATED).json(response);
+      })
+      .post(this.routerPath('starMessage'), ...guards, async (req, res) => {
+        const response = await this.dataValidate<StarMessageDto>({
+          request: req,
+          schema: starMessageSchema,
+          ClassRef: StarMessageDto,
+          execute: (instance, data) => chatController.starMessage(instance, data),
         });
 
         return res.status(HttpStatus.CREATED).json(response);

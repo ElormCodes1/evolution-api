@@ -86,6 +86,24 @@ export class MarkChatUnreadDto {
   chat?: string;
 }
 
+export class PinChatDto {
+  chat: string;
+  pin: boolean;
+}
+
+export class MuteChatDto {
+  chat: string;
+  // Duration in ms to mute, or null to unmute.
+  mute: number | null;
+}
+
+export class StarMessageDto {
+  chat: string;
+  messageId: string;
+  fromMe: boolean;
+  star: boolean;
+}
+
 export class PrivacySettingDto {
   readreceipts: WAReadReceiptsValue;
   profile: WAPrivacyValue;

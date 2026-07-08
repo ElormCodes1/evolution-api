@@ -118,6 +118,41 @@ export const markChatUnreadSchema: JSONSchema7 = {
   required: ['lastMessage'],
 };
 
+export const pinChatSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    chat: { type: 'string' },
+    pin: { type: 'boolean', enum: [true, false] },
+  },
+  required: ['chat', 'pin'],
+  ...isNotEmpty('chat'),
+};
+
+export const muteChatSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    chat: { type: 'string' },
+    mute: { type: ['number', 'null'] },
+  },
+  required: ['chat'],
+  ...isNotEmpty('chat'),
+};
+
+export const starMessageSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    chat: { type: 'string' },
+    messageId: { type: 'string' },
+    fromMe: { type: 'boolean', enum: [true, false] },
+    star: { type: 'boolean', enum: [true, false] },
+  },
+  required: ['chat', 'messageId', 'fromMe', 'star'],
+  ...isNotEmpty('chat', 'messageId'),
+};
+
 export const deleteMessageSchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',

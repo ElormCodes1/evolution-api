@@ -13,6 +13,7 @@ export enum Events {
   MESSAGES_UPSERT = 'messages.upsert',
   MESSAGES_EDITED = 'messages.edited',
   MESSAGES_UPDATE = 'messages.update',
+  MESSAGE_RECEIPT_UPDATE = 'message-receipt.update',
   MESSAGES_DELETE = 'messages.delete',
   SEND_MESSAGE = 'send.message',
   SEND_MESSAGE_UPDATE = 'send.message.update',

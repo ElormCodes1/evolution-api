@@ -7,6 +7,9 @@ import {
   getBase64FromMediaMessageDto,
   LastMessage,
   MarkChatUnreadDto,
+  MuteChatDto,
+  PinChatDto,
+  StarMessageDto,
   NumberBusiness,
   OnWhatsAppDto,
   PrivacySettingDto,
@@ -1926,6 +1929,13 @@ export class BaileysStartupService extends ChannelStartupService {
 
             if (events['message-receipt.update']) {
               const payload = events['message-receipt.update'] as MessageUserReceiptUpdate[];
+
+              // Forward the raw receipt payload (incl. receipt.userJid, the
+              // viewer) so the CRM can attribute status views ("seen by").
+              // Stock Evolution only collapses this to remoteJid->timestamp
+              // below and discards the viewer, so we emit the full event.
+              this.sendDataWebhook(Events.MESSAGE_RECEIPT_UPDATE, payload);
+
               const remotesJidMap: Record<string, number> = {};
 
               for (const event of payload) {
@@ -3764,6 +3774,45 @@ export class BaileysStartupService extends ChannelStartupService {
       throw new InternalServerErrorException({
         markedChatUnread: false,
         message: ['An error occurred while marked unread the chat. Open a calling.', error.toString()],
+      });
+    }
+  }
+
+  public async pinChat(data: PinChatDto) {
+    try {
+      await this.client.chatModify({ pin: data.pin }, createJid(data.chat));
+      return { chatId: data.chat, pinned: data.pin };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        pinned: false,
+        message: ['An error occurred while pinning the chat.', error?.toString()],
+      });
+    }
+  }
+
+  public async muteChat(data: MuteChatDto) {
+    try {
+      await this.client.chatModify({ mute: data.mute }, createJid(data.chat));
+      return { chatId: data.chat, muted: data.mute !== null };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        muted: false,
+        message: ['An error occurred while muting the chat.', error?.toString()],
+      });
+    }
+  }
+
+  public async starMessage(data: StarMessageDto) {
+    try {
+      await this.client.chatModify(
+        { star: { messages: [{ id: data.messageId, fromMe: data.fromMe }], star: data.star } },
+        createJid(data.chat),
+      );
+      return { chatId: data.chat, messageId: data.messageId, starred: data.star };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        starred: false,
+        message: ['An error occurred while starring the message.', error?.toString()],
       });
     }
   }
