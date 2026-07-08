@@ -81,6 +81,11 @@ export class ArchiveChatDto {
   archive: boolean;
 }
 
+export class ClearChatDto {
+  lastMessage?: LastMessage;
+  chat?: string;
+}
+
 export class MarkChatUnreadDto {
   lastMessage?: LastMessage;
   chat?: string;
