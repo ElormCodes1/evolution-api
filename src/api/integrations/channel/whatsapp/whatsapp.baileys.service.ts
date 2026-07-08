@@ -1,4 +1,9 @@
-import { getCollectionsDto } from '@api/dto/business.dto';
+import {
+  CreateProductDto,
+  DeleteProductDto,
+  getCollectionsDto,
+  UpdateProductDto,
+} from '@api/dto/business.dto';
 import { OfferCallDto } from '@api/dto/call.dto';
 import {
   ArchiveChatDto,
@@ -5230,6 +5235,55 @@ export class BaileysStartupService extends ChannelStartupService {
       return result.collections;
     } catch (error) {
       throw new InternalServerErrorException('Error getCatalog', error.toString());
+    }
+  }
+
+  // ============================================================
+  // Store / catalog management (Baileys product* + business profile)
+  // ============================================================
+
+  public async createProduct(data: CreateProductDto) {
+    try {
+      const images = (data.images ?? []).map((url) => ({ url }));
+      return await this.client.productCreate({
+        name: data.name,
+        price: data.price,
+        currency: data.currency,
+        description: data.description ?? '',
+        retailerId: data.retailerId,
+        url: data.url,
+        isHidden: data.isHidden,
+        originCountryCode: undefined,
+        images,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(['Error creating the product.', error?.toString()]);
+    }
+  }
+
+  public async updateProduct(data: UpdateProductDto) {
+    try {
+      const images = (data.images ?? []).map((url) => ({ url }));
+      return await this.client.productUpdate(data.productId, {
+        name: data.name,
+        price: data.price,
+        currency: data.currency,
+        description: data.description ?? '',
+        retailerId: data.retailerId,
+        url: data.url,
+        isHidden: data.isHidden,
+        images,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(['Error updating the product.', error?.toString()]);
+    }
+  }
+
+  public async deleteProduct(data: DeleteProductDto) {
+    try {
+      return await this.client.productDelete(data.productIds);
+    } catch (error) {
+      throw new InternalServerErrorException(['Error deleting the product.', error?.toString()]);
     }
   }
 
