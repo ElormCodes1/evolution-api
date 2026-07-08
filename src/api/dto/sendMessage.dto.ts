@@ -71,6 +71,16 @@ export class SendPollDto extends Metadata {
   messageSecret?: Uint8Array;
 }
 
+export class SendAlbumDto extends Metadata {
+  // 2+ image/video items sent as a single grouped album.
+  media: Array<{
+    type: 'image' | 'video';
+    // url or base64
+    media: string;
+    caption?: string;
+  }>;
+}
+
 export class SendPinDto extends Metadata {
   // The message being (un)pinned, identified by its Baileys key.
   key: { id: string; fromMe: boolean; remoteJid: string };

@@ -58,6 +58,7 @@ import {
   KeyType,
   MediaMessage,
   Options,
+  SendAlbumDto,
   SendAudioDto,
   SendButtonsDto,
   SendContactDto,
@@ -2727,6 +2728,48 @@ export class BaileysStartupService extends ChannelStartupService {
         mentioned: data?.mentioned,
       },
     );
+  }
+
+  public async albumMessage(data: SendAlbumDto) {
+    try {
+      const jid = createJid(data.number);
+      const items = data.media || [];
+      const expectedImageCount = items.filter((i) => i.type === 'image').length;
+      const expectedVideoCount = items.filter((i) => i.type === 'video').length;
+
+      // Built directly against the proto (this Baileys build has no
+      // high-level `{ album }` helper, but the proto supports albumMessage
+      // + MEDIA_ALBUM association). 1) relay an album header, then 2) relay
+      // each media item tagged with the header's key so WhatsApp groups them.
+      const header = generateWAMessageFromContent(
+        jid,
+        { albumMessage: { expectedImageCount, expectedVideoCount } } as any,
+        { userJid: this.instance.wuid } as any,
+      );
+      await this.client.relayMessage(jid, header.message, { messageId: header.key.id });
+
+      const messages: any[] = [header];
+      for (const item of items) {
+        const generate = await this.prepareMediaMessage({
+          mediatype: item.type,
+          media: item.media,
+          caption: item.caption,
+        } as SendMediaDto);
+        (generate.message as any).messageContextInfo = {
+          ...(generate.message as any).messageContextInfo,
+          messageAssociation: {
+            associationType: proto.MessageAssociation.AssociationType.MEDIA_ALBUM,
+            parentMessageKey: header.key,
+          },
+        };
+        await this.client.relayMessage(jid, generate.message, { messageId: generate.key.id });
+        messages.push(generate);
+      }
+
+      return { albumKey: header.key, count: items.length, messages };
+    } catch (error) {
+      throw new BadRequestException('Error sending album', error.toString());
+    }
   }
 
   public async pinMessage(data: SendPinDto) {

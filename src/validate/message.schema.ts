@@ -205,6 +205,30 @@ export const eventMessageSchema: JSONSchema7 = {
   ...isNotEmpty('number', 'name'),
 };
 
+export const albumMessageSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    number: { ...numberDefinition },
+    media: {
+      type: 'array',
+      minItems: 2,
+      items: {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['image', 'video'] },
+          media: { type: 'string' },
+          caption: { type: 'string' },
+        },
+        required: ['type', 'media'],
+      },
+    },
+    delay: { type: 'integer', description: 'Enter a value in milliseconds' },
+  },
+  required: ['number', 'media'],
+  ...isNotEmpty('number'),
+};
+
 export const pinMessageSchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',
