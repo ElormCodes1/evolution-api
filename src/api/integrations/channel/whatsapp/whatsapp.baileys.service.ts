@@ -3013,9 +3013,15 @@ export class BaileysStartupService extends ChannelStartupService {
 
     const generate = await this.prepareMediaMessage(mediaData);
 
+    // "View once": wrap the media content the same way Baileys does when
+    // `viewOnce` is set, so it disappears after the recipient opens it.
+    const content = data?.viewOnce
+      ? { viewOnceMessage: { message: generate.message } }
+      : { ...generate.message };
+
     const mediaSent = await this.sendMessageWithTyping(
       data.number,
-      { ...generate.message },
+      content,
       {
         delay: data?.delay,
         presence: 'composing',

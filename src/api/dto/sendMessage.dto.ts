@@ -81,6 +81,9 @@ export class SendMediaDto extends Metadata {
   fileName?: string;
   // url or base64
   media: string;
+  // when true, send as a "view once" message (disappears after the
+  // recipient opens it once)
+  viewOnce?: boolean;
 }
 
 export class SendPtvDto extends Metadata {
