@@ -12,6 +12,9 @@ WORKDIR /evolution
 COPY ./package*.json ./
 COPY ./tsconfig.json ./
 COPY ./tsup.config.ts ./
+# patch-package runs on postinstall to apply patches/ against node_modules
+# (e.g. the baileys newsletterCreate null-picture fix). Copy before install.
+COPY ./patches ./patches
 
 RUN npm ci --silent
 
