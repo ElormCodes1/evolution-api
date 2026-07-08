@@ -19,6 +19,12 @@ import {
   WhatsAppNumberDto,
 } from '@api/dto/chat.dto';
 import {
+  CreateNewsletterDto,
+  NewsletterJidDto,
+  NewsletterMetadataDto,
+  UpdateNewsletterDto,
+} from '@api/dto/newsletter.dto';
+import {
   AcceptGroupInvite,
   CreateGroupDto,
   GetParticipant,
@@ -3814,6 +3820,82 @@ export class BaileysStartupService extends ChannelStartupService {
         starred: false,
         message: ['An error occurred while starring the message.', error?.toString()],
       });
+    }
+  }
+
+  // ============================================================
+  // Newsletters / Channels (Baileys newsletter* API)
+  // ============================================================
+
+  public async createNewsletter(data: CreateNewsletterDto) {
+    try {
+      return await this.client.newsletterCreate(data.name, data.description);
+    } catch (error) {
+      throw new InternalServerErrorException(['Error creating the newsletter.', error?.toString()]);
+    }
+  }
+
+  public async newsletterMetadata(data: NewsletterMetadataDto) {
+    try {
+      return await this.client.newsletterMetadata(data.type, data.key);
+    } catch (error) {
+      throw new InternalServerErrorException(['Error fetching newsletter metadata.', error?.toString()]);
+    }
+  }
+
+  public async followNewsletter(data: NewsletterJidDto) {
+    try {
+      await this.client.newsletterFollow(data.jid);
+      return { jid: data.jid, followed: true };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error following the newsletter.', error?.toString()]);
+    }
+  }
+
+  public async unfollowNewsletter(data: NewsletterJidDto) {
+    try {
+      await this.client.newsletterUnfollow(data.jid);
+      return { jid: data.jid, followed: false };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error unfollowing the newsletter.', error?.toString()]);
+    }
+  }
+
+  public async muteNewsletter(data: NewsletterJidDto) {
+    try {
+      await this.client.newsletterMute(data.jid);
+      return { jid: data.jid, muted: true };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error muting the newsletter.', error?.toString()]);
+    }
+  }
+
+  public async unmuteNewsletter(data: NewsletterJidDto) {
+    try {
+      await this.client.newsletterUnmute(data.jid);
+      return { jid: data.jid, muted: false };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error unmuting the newsletter.', error?.toString()]);
+    }
+  }
+
+  public async updateNewsletter(data: UpdateNewsletterDto) {
+    try {
+      if (data.name) await this.client.newsletterUpdateName(data.jid, data.name);
+      if (data.description !== undefined)
+        await this.client.newsletterUpdateDescription(data.jid, data.description);
+      return { jid: data.jid, updated: true };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error updating the newsletter.', error?.toString()]);
+    }
+  }
+
+  public async deleteNewsletter(data: NewsletterJidDto) {
+    try {
+      await this.client.newsletterDelete(data.jid);
+      return { jid: data.jid, deleted: true };
+    } catch (error) {
+      throw new InternalServerErrorException(['Error deleting the newsletter.', error?.toString()]);
     }
   }
 
