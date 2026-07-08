@@ -7,6 +7,7 @@ import {
   SendListDto,
   SendLocationDto,
   SendMediaDto,
+  SendPinDto,
   SendPollDto,
   SendPtvDto,
   SendReactionDto,
@@ -104,6 +105,10 @@ export class SendMessageController {
 
   public async sendEvent({ instanceName }: InstanceDto, data: SendEventDto) {
     return await this.waMonitor.waInstances[instanceName].eventMessage(data);
+  }
+
+  public async pinMessage({ instanceName }: InstanceDto, data: SendPinDto) {
+    return await this.waMonitor.waInstances[instanceName].pinMessage(data);
   }
 
   public async sendStatus({ instanceName }: InstanceDto, data: SendStatusDto, file?: any) {

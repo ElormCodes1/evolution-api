@@ -65,6 +65,7 @@ import {
   SendListDto,
   SendLocationDto,
   SendMediaDto,
+  SendPinDto,
   SendPollDto,
   SendPtvDto,
   SendReactionDto,
@@ -2726,6 +2727,21 @@ export class BaileysStartupService extends ChannelStartupService {
         mentioned: data?.mentioned,
       },
     );
+  }
+
+  public async pinMessage(data: SendPinDto) {
+    try {
+      const jid = createJid(data.number);
+      // proto.PinInChat.Type: 1 = pin for all, 2 = unpin for all.
+      const type = data.action === 'unpin' ? 2 : 1;
+      const content: any = { pin: data.key, type };
+      if (type === 1) content.time = data.duration || 604800; // default 7 days
+      // A message add-on (like a reaction) — send directly; the generic
+      // send wrapper would try to forward it as a normal message.
+      return await this.client.sendMessage(jid, content);
+    } catch (error) {
+      throw new BadRequestException('Error pinning message', error.toString());
+    }
   }
 
   private async formatStatusMessage(status: StatusMessage) {

@@ -205,6 +205,27 @@ export const eventMessageSchema: JSONSchema7 = {
   ...isNotEmpty('number', 'name'),
 };
 
+export const pinMessageSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    number: { ...numberDefinition },
+    key: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        fromMe: { type: 'boolean', enum: [true, false] },
+        remoteJid: { type: 'string' },
+      },
+      required: ['id', 'fromMe', 'remoteJid'],
+    },
+    action: { type: 'string', enum: ['pin', 'unpin'] },
+    duration: { type: 'integer', enum: [86400, 604800, 2592000] },
+  },
+  required: ['number', 'key', 'action'],
+  ...isNotEmpty('number', 'action'),
+};
+
 export const statusMessageSchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',

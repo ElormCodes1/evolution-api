@@ -71,6 +71,14 @@ export class SendPollDto extends Metadata {
   messageSecret?: Uint8Array;
 }
 
+export class SendPinDto extends Metadata {
+  // The message being (un)pinned, identified by its Baileys key.
+  key: { id: string; fromMe: boolean; remoteJid: string };
+  action: 'pin' | 'unpin';
+  // Pin duration in seconds (24h / 7d / 30d). Ignored on unpin.
+  duration?: 86400 | 604800 | 2592000;
+}
+
 export class SendEventDto extends Metadata {
   name: string;
   description?: string;
