@@ -15,16 +15,3 @@ index 0000001..0000002 100644
          mute_state: viewer.mute
      };
  };
-diff --git a/node_modules/baileys/lib/Socket/messages-send.js b/node_modules/baileys/lib/Socket/messages-send.js
-index 1111111..2222222 100644
---- a/node_modules/baileys/lib/Socket/messages-send.js
-+++ b/node_modules/baileys/lib/Socket/messages-send.js
-@@ -502,7 +502,7 @@
-                 }
-                 const additionalDevices = await getUSyncDevices(participantsList, !!useUserDevicesCache, false);
-                 devices.push(...additionalDevices);
--                if (isGroup) {
-+                if (isGroup || isStatus) {
-                     additionalAttributes = {
-                         ...additionalAttributes,
-                         addressing_mode: groupData?.addressingMode || 'lid'
