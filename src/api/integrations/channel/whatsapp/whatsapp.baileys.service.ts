@@ -4165,9 +4165,14 @@ export class BaileysStartupService extends ChannelStartupService {
         const contacts = await this.prismaRepository.contact.findMany({
           where: { instanceId: this.instanceId },
         });
-        statusOptions = {
-          statusJidList: contacts.filter((c) => c.pushName).map((c) => c.remoteJid),
-        } as unknown as MiscMessageGenerationOptions;
+        const statusJidList = contacts.filter((c) => c.pushName).map((c) => c.remoteJid);
+        statusOptions = { statusJidList } as unknown as MiscMessageGenerationOptions;
+        // The REVOKE key must carry the poster's own JID as participant so
+        // recipients can match it to the original status on their devices;
+        // without it the revoke is ignored and the status stays live.
+        if (!(del as any).participant) {
+          (del as any).participant = this.instance.wuid;
+        }
       }
       const response = await this.client.sendMessage(del.remoteJid, { delete: del }, statusOptions);
       if (response) {
