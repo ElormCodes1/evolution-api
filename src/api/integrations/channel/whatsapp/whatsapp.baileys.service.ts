@@ -2289,7 +2289,7 @@ export class BaileysStartupService extends ChannelStartupService {
         jidList = message['status'].option.statusJidList;
       }
 
-      const batchSize = 10;
+      const batchSize = 50;
 
       const batches = Array.from({ length: Math.ceil(jidList.length / batchSize) }, (_, i) =>
         jidList.slice(i * batchSize, i * batchSize + batchSize),
@@ -2317,22 +2317,30 @@ export class BaileysStartupService extends ChannelStartupService {
 
       if (batches.length === 0) return firstMessage;
 
-      await Promise.allSettled(
-        batches.map(async (batch) => {
-          const messageSent = await this.client.sendMessage(
-            sender,
-            message['status'].content as unknown as AnyMessageContent,
-            {
-              backgroundColor: message['status'].option.backgroundColor,
-              font: message['status'].option.font,
-              statusJidList: batch,
-              messageId: msgId,
-            } as unknown as MiscMessageGenerationOptions,
-          );
-
-          return messageSent;
-        }),
-      );
+      // Fan the remaining batches out in the BACKGROUND, sequentially:
+      // - background: the API (and the user's Post button) shouldn't wait
+      //   for the whole audience — the status exists once batch 1 is sent
+      //   and the remaining recipients receive it over the next seconds.
+      // - sequential: the old Promise.allSettled fired dozens of concurrent
+      //   sendMessage calls on one socket, which is slow and destabilizing.
+      void (async () => {
+        for (const batch of batches) {
+          try {
+            await this.client.sendMessage(
+              sender,
+              message['status'].content as unknown as AnyMessageContent,
+              {
+                backgroundColor: message['status'].option.backgroundColor,
+                font: message['status'].option.font,
+                statusJidList: batch,
+                messageId: msgId,
+              } as unknown as MiscMessageGenerationOptions,
+            );
+          } catch (error) {
+            this.logger.error(['Status fanout batch failed', String(error)]);
+          }
+        }
+      })();
 
       return firstMessage;
     }
@@ -2862,12 +2870,14 @@ export class BaileysStartupService extends ChannelStartupService {
     // status audience (getBroadcastListParticipants appends ownID), so our
     // other devices — the primary phone — receive the status too. That is
     // what makes the status appear under the phone's "My status" and lets
-    // the primary participate in revokes.
+    // the primary participate in revokes. Placed FIRST so it lands in the
+    // first send batch — the phone syncs immediately, not after the whole
+    // (background) fanout.
     const ownStatusJid = this.instance.wuid;
     if (ownStatusJid) {
       status.statusJidList = status.statusJidList ?? [];
       if (!status.statusJidList.includes(ownStatusJid)) {
-        status.statusJidList.push(ownStatusJid);
+        status.statusJidList.unshift(ownStatusJid);
       }
     }
 
