@@ -2840,6 +2840,19 @@ export class BaileysStartupService extends ChannelStartupService {
       throw new BadRequestException('StatusJidList is required');
     }
 
+    // Mirror whatsmeow/official behavior: the own JID is always part of the
+    // status audience (getBroadcastListParticipants appends ownID), so our
+    // other devices — the primary phone — receive the status too. That is
+    // what makes the status appear under the phone's "My status" and lets
+    // the primary participate in revokes.
+    const ownStatusJid = this.instance.wuid;
+    if (ownStatusJid) {
+      status.statusJidList = status.statusJidList ?? [];
+      if (!status.statusJidList.includes(ownStatusJid)) {
+        status.statusJidList.push(ownStatusJid);
+      }
+    }
+
     if (status.type === 'text') {
       if (!status.backgroundColor) {
         throw new BadRequestException('Background color is required');
@@ -4179,6 +4192,12 @@ export class BaileysStartupService extends ChannelStartupService {
               (jid.endsWith('@s.whatsapp.net') || jid.endsWith('@lid')) &&
               !jid.startsWith('0@'),
           );
+        // Own JID included, mirroring whatsmeow's status recipient list —
+        // the primary phone must receive the revoke to participate in it.
+        const ownJid = this.instance.wuid;
+        if (ownJid && !statusJidList.includes(ownJid)) {
+          statusJidList.push(ownJid);
+        }
         statusOptions = { statusJidList } as unknown as MiscMessageGenerationOptions;
       }
       const response = await this.client.sendMessage(del.remoteJid, { delete: del }, statusOptions);
