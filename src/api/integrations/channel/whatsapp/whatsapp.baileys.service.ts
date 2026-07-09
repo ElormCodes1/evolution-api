@@ -1111,15 +1111,6 @@ export class BaileysStartupService extends ChannelStartupService {
     ) => {
       try {
         for (const received of messages) {
-          // TEMP CAPTURE: log the exact shape of incoming status revokes from
-          // official clients (a contact/phone deleting a status) so our own
-          // companion revoke can replicate it byte-for-byte. Remove after use.
-          if (
-            received?.key?.remoteJid === 'status@broadcast' &&
-            (received?.message?.protocolMessage || received?.messageStubType)
-          ) {
-            this.logger.warn(`[status-revoke-capture] ${JSON.stringify(received)}`);
-          }
           if (
             received?.messageStubParameters?.some?.((param) =>
               [
@@ -1596,12 +1587,6 @@ export class BaileysStartupService extends ChannelStartupService {
       const readChatToUpdate: Record<string, true> = {}; // {remoteJid: true}
 
       for await (const { key, update } of args) {
-        // TEMP CAPTURE: an incoming status revoke surfaces here — `update.key`
-        // is the official client's revoke ENVELOPE key (participant,
-        // addressing) and `key` is the target. Remove after use.
-        if (key?.remoteJid === 'status@broadcast') {
-          this.logger.warn(`[status-revoke-capture] key=${JSON.stringify(key)} update=${JSON.stringify(update)}`);
-        }
         if (settings?.groupsIgnore && key.remoteJid?.includes('@g.us')) {
           continue;
         }
