@@ -2289,19 +2289,26 @@ export class BaileysStartupService extends ChannelStartupService {
         jidList = message['status'].option.statusJidList;
       }
 
-      const batchSize = 50;
+      // Latency budget: the caller (and the user's Post button) only waits
+      // for this FIRST synchronous send. Keep it minimal — just the own JID,
+      // which is already at the front of jidList and always has a live
+      // session (no prekey fetch). That registers the status + mints the
+      // message id near-instantly and syncs the primary phone. Every other
+      // recipient — many of whom need a prekey fetch (network round-trips) —
+      // is served in the background, so those round-trips never block the UI.
+      const firstBatch = jidList.slice(0, 1);
+      const restJids = jidList.slice(1);
 
-      const batches = Array.from({ length: Math.ceil(jidList.length / batchSize) }, (_, i) =>
-        jidList.slice(i * batchSize, i * batchSize + batchSize),
+      const bgBatchSize = 100;
+      const batches = Array.from({ length: Math.ceil(restJids.length / bgBatchSize) }, (_, i) =>
+        restJids.slice(i * bgBatchSize, i * bgBatchSize + bgBatchSize),
       );
 
       let msgId: string | null = null;
 
       let firstMessage: WAMessage;
 
-      const firstBatch = batches.shift();
-
-      if (firstBatch) {
+      if (firstBatch.length) {
         firstMessage = await this.client.sendMessage(
           sender,
           message['status'].content as unknown as AnyMessageContent,
