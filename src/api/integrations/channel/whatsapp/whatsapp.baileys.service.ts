@@ -1111,6 +1111,15 @@ export class BaileysStartupService extends ChannelStartupService {
     ) => {
       try {
         for (const received of messages) {
+          // TEMP CAPTURE: log the exact shape of incoming status revokes from
+          // official clients (a contact/phone deleting a status) so our own
+          // companion revoke can replicate it byte-for-byte. Remove after use.
+          if (
+            received?.key?.remoteJid === 'status@broadcast' &&
+            (received?.message?.protocolMessage || received?.messageStubType)
+          ) {
+            this.logger.warn(`[status-revoke-capture] ${JSON.stringify(received)}`);
+          }
           if (
             received?.messageStubParameters?.some?.((param) =>
               [
