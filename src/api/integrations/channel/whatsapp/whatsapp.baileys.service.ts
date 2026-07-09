@@ -4162,17 +4162,24 @@ export class BaileysStartupService extends ChannelStartupService {
       // and the status stays live for everyone who received it.
       let statusOptions: MiscMessageGenerationOptions | undefined = undefined;
       if (del.remoteJid === 'status@broadcast') {
+        // Revoking a status must fan the delete out to the recipients the
+        // status reached (Baileys needs statusJidList for status@broadcast).
+        // Only real people are valid status recipients — Evolution stores
+        // groups/newsletters as "contacts" too, so filter to individual
+        // user JIDs (drop @g.us / @newsletter / @broadcast and bogus 0@).
         const contacts = await this.prismaRepository.contact.findMany({
           where: { instanceId: this.instanceId },
         });
-        const statusJidList = contacts.filter((c) => c.pushName).map((c) => c.remoteJid);
+        const statusJidList = contacts
+          .filter((c) => c.pushName)
+          .map((c) => c.remoteJid)
+          .filter(
+            (jid) =>
+              !!jid &&
+              (jid.endsWith('@s.whatsapp.net') || jid.endsWith('@lid')) &&
+              !jid.startsWith('0@'),
+          );
         statusOptions = { statusJidList } as unknown as MiscMessageGenerationOptions;
-        // The REVOKE key must carry the poster's own JID as participant so
-        // recipients can match it to the original status on their devices;
-        // without it the revoke is ignored and the status stays live.
-        if (!(del as any).participant) {
-          (del as any).participant = this.instance.wuid;
-        }
       }
       const response = await this.client.sendMessage(del.remoteJid, { delete: del }, statusOptions);
       if (response) {
