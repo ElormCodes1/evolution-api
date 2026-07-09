@@ -43,6 +43,14 @@ export function createJid(number: string): string {
     return number;
   }
 
+  // Channels/newsletters have their own server; Baileys' relayMessage routes
+  // them through encodeNewsletterMessage. Passing the JID through untouched
+  // keeps it from being mangled into an @g.us group id by the digit logic
+  // below (an 18-digit newsletter id otherwise becomes a bogus @g.us).
+  if (number.includes('@newsletter')) {
+    return number;
+  }
+
   number = number
     ?.replace(/\s/g, '')
     .replace(/\+/g, '')

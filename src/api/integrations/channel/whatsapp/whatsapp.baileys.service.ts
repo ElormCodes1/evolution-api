@@ -2334,7 +2334,7 @@ export class BaileysStartupService extends ChannelStartupService {
   ) {
     const isWA = (await this.whatsappNumber({ numbers: [number] }))?.shift();
 
-    if (!isWA.exists && !isJidGroup(isWA.jid) && !isWA.jid.includes('@broadcast')) {
+    if (!isWA.exists && !isJidGroup(isWA.jid) && !isWA.jid.includes('@broadcast') && !isWA.jid.includes('@newsletter')) {
       throw new BadRequestException(isWA);
     }
 
@@ -2608,7 +2608,7 @@ export class BaileysStartupService extends ChannelStartupService {
 
       const isWA = (await this.whatsappNumber({ numbers: [number] }))?.shift();
 
-      if (!isWA.exists && !isJidGroup(isWA.jid) && !isWA.jid.includes('@broadcast')) {
+      if (!isWA.exists && !isJidGroup(isWA.jid) && !isWA.jid.includes('@broadcast') && !isWA.jid.includes('@newsletter')) {
         throw new BadRequestException(isWA);
       }
 
@@ -4156,7 +4156,20 @@ export class BaileysStartupService extends ChannelStartupService {
 
   public async deleteMessage(del: DeleteMessage) {
     try {
-      const response = await this.client.sendMessage(del.remoteJid, { delete: del });
+      // Revoking a STATUS (status@broadcast) must fan the delete out to the
+      // same recipients the status reached — Baileys requires `statusJidList`
+      // for status@broadcast, otherwise the revoke is only applied locally
+      // and the status stays live for everyone who received it.
+      let statusOptions: MiscMessageGenerationOptions | undefined = undefined;
+      if (del.remoteJid === 'status@broadcast') {
+        const contacts = await this.prismaRepository.contact.findMany({
+          where: { instanceId: this.instanceId },
+        });
+        statusOptions = {
+          statusJidList: contacts.filter((c) => c.pushName).map((c) => c.remoteJid),
+        } as unknown as MiscMessageGenerationOptions;
+      }
+      const response = await this.client.sendMessage(del.remoteJid, { delete: del }, statusOptions);
       if (response) {
         const messageId = response.message?.protocolMessage?.key?.id;
         if (messageId) {
@@ -4501,7 +4514,7 @@ export class BaileysStartupService extends ChannelStartupService {
 
       const isWA = (await this.whatsappNumber({ numbers: [number] }))?.shift();
 
-      if (!isWA.exists && !isJidGroup(isWA.jid) && !isWA.jid.includes('@broadcast')) {
+      if (!isWA.exists && !isJidGroup(isWA.jid) && !isWA.jid.includes('@broadcast') && !isWA.jid.includes('@newsletter')) {
         throw new BadRequestException(isWA);
       }
 
