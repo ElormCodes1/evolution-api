@@ -1637,6 +1637,24 @@ export class BaileysStartupService extends ChannelStartupService {
           }
         }
 
+        // Status revokes (a poster deleting their status) were silently
+        // dropped by the guard below. Forward them so the CRM can remove the
+        // status from its feed like WhatsApp removes it from viewers.
+        if (
+          key.remoteJid === 'status@broadcast' &&
+          key.id !== undefined &&
+          (update.message === null || (update as any).messageStubType)
+        ) {
+          this.sendDataWebhook(Events.MESSAGES_UPDATE, {
+            keyId: key.id,
+            remoteJid: key.remoteJid,
+            fromMe: key.fromMe,
+            participant: (key as any)?.participant,
+            status: 'DELETED',
+            instanceId: this.instanceId,
+          });
+        }
+
         if (key.remoteJid !== 'status@broadcast' && key.id !== undefined) {
           let pollUpdates: any;
 
